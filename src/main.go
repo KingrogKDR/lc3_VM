@@ -1,65 +1,44 @@
 package main
 
-const MAX_MEMORY = 1 << 16
+import (
+	"fmt"
+	"os"
+
+	"github.com/KingrogKDR/lc3_VM/src/emulator"
+)
+
+const PC_START = 0x3000
 
 var is_Running bool
 
-type VM struct {
-	memory [MAX_MEMORY]uint16
-	reg    [R_COUNT]uint16
-}
-
-func (v VM) mem_read(address uint16) uint16 {
-	return v.memory[address]
-}
-
 func main() {
-	vm := VM{}
-	vm.reg[R_COND] = uint16(FL_ZRO)
 
-	vm.reg[R_PC] = PC_START
+	if len(os.Args) < 2 {
+		fmt.Println("lc3 Image failed....")
+		os.Exit(2)
+	}
+
+	for i := 1; i < len(os.Args); i++ {
+		imagePath := os.Args[i]
+		if !ReadImage(imagePath) {
+			fmt.Printf("failed to load image: %s\n", imagePath)
+			os.Exit(1)
+		}
+	}
+
+	fmt.Println("All images loaded successfully. Starting LC-3 emulation...")
+
+	myVm := emulator.NewVM()
+
+	myVm.Reg[emulator.R_COND] = uint16(emulator.FL_ZRO)
+
+	myVm.Reg[emulator.R_PC] = PC_START
 	is_Running = true
 
 	for is_Running {
-		instr := vm.mem_read(vm.reg[R_PC])
-		vm.reg[R_PC]++
+		instr := myVm.Mem_read(myVm.Reg[emulator.R_PC])
+		myVm.Reg[emulator.R_PC]++
 		op := instr >> 12
-
-		switch op {
-		case uint16(OP_ADD):
-			//add
-
-		case uint16(OP_AND):
-
-		case uint16(OP_BR):
-
-		case uint16(OP_JMP):
-
-		case uint16(OP_JSR):
-
-		case uint16(OP_LD):
-
-		case uint16(OP_LDI):
-
-		case uint16(OP_LDR):
-
-		case uint16(OP_LEA):
-
-		case uint16(OP_NOT):
-
-		case uint16(OP_ST):
-
-		case uint16(OP_STI):
-
-		case uint16(OP_STR):
-
-		case uint16(OP_TRAP):
-
-		case uint16(OP_RES):
-		case uint16(OP_RTI):
-		default:
-			//bad opcode
-
-		}
+		myVm.CheckInstr(op, instr)
 	}
 }

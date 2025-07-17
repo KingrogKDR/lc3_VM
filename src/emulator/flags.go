@@ -1,4 +1,4 @@
-package main
+package emulator
 
 type Registers int
 type Cond_flags int
@@ -23,4 +23,4 @@ const (
 	FL_NEG
 )
 
-const PC_START = 0x3000
+const MAX_MEMORY = 1 << 16
